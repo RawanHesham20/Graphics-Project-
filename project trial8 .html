@@ -1,0 +1,361 @@
+<canvas id="myCanvas"></canvas>
+</script>
+<html>
+<style>
+	button {
+  outline: none;
+  cursor: pointer;
+  border: none;
+  box-shadow: 3px 5px 0px 0px rgba(0,0,0,0.75);
+}
+	#counter {
+  position: absolute;
+  top: 40px;
+  right: 20px;
+  font-size: 100px;
+}
+ 
+
+</style>
+ 	<div>
+ 		<button id="counter">0</button>
+ 	</div>
+</html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
+<script>
+
+//Get the height and the width of the window
+	var ww = window.innerWidth, wh = window.innerHeight;
+	var geometry1, material1,cube1;
+	var geometry2, material2, cube2;
+	var geometry3,material3,sphere1;
+	var geometry4, material4, sphere2;
+	var geometry5,material5,cylinder;
+	var distanceTree1=450 , distanceTree2=50;
+	var initialCameraPositionY = 0;
+	var initialCameraPositionX = 0;
+	var distance = 700;
+	var lane=-100;
+var cars=270;
+	var trucks=345;
+	var xOffset = -80;
+	var group1 = new THREE.Group();
+	var group2 = new THREE.Group();
+	var group3 = new THREE.Group();
+	var counter=0;
+	var num=document.getElementById('counter'); 
+
+
+function init(){
+
+
+	/* WEBGL RENDERER */
+	renderer = new THREE.WebGLRenderer({canvas : document.getElementById('myCanvas')});
+	const loader = new THREE.TextureLoader();
+	renderer.setClearColor(0x00FF00);
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	renderer.setSize(ww,wh);
+
+	/* SCENE */
+	scene = new THREE.Scene();
+	scene.background = loader.load( "grass1.jpg");
+
+	/* CAMERA */
+	camera = new THREE.PerspectiveCamera(50, ww/wh, 1, 10000 );
+	camera.position.y = initialCameraPositionY;
+	camera.position.x = initialCameraPositionX;
+	camera.position.z = distance;
+
+	camera.lookAt(new THREE.Vector3(0,0,0));
+	scene.add(camera);
+
+	/* LIGHT */
+
+		light = new THREE.DirectionalLight(0xffffff, 1 , 1);
+		light.position.set( 0, 0, 0); //default; light shining from top
+		//light.castShadow = true; // default false
+		scene.add(light);
+
+		light.shadow.mapSize.width = 512; // default
+		light.shadow.mapSize.height = 512; // default
+		light.shadow.camera.near = 0.5; // default
+		light.shadow.camera.far = 500; // default
+	
+	/*	SpotLight = new THREE.SpotLight(0xFFFFFF, 1.0,100,20 * Math.PI/180);
+		SpotLight.castShadow = true;
+		SpotLight.position.set(0, 20, 0);
+		light=SpotLight;
+		scene.add(light);
+
+		light.shadow.mapSize.width = 512; // default
+		light.shadow.mapSize.height = 512; // default
+		light.shadow.camera.near = 0.5; // default
+		light.shadow.camera.far = 500; // default*/
+	
+	//Create all our shapes
+	createShapes();
+	rendercube2();
+	renderspheres();
+	check();
+
+	//Render the scene
+	renderer.render(scene,camera);
+
+};
+
+
+
+
+
+function createShapes(){
+
+	//grass
+		/*	const geometry = new THREE.PlaneGeometry( ww, wh );
+			const loader = new THREE.TextureLoader();
+			texture = loader.load( "grass1.jpg");
+			const material = new THREE.MeshBasicMaterial( {map: texture} );
+			 plane = new THREE.Mesh( geometry, material );
+			plane.receiveShadow = true;
+			scene.add( plane );*/
+
+	//street
+	for(var i=0;i<400;i++){
+			geometry1 = new THREE.BoxGeometry( 5000, 150 , 20 );
+			loader1 = new THREE.TextureLoader();
+			texture1 = loader1.load("road2.jpg");
+			material1 = new THREE.MeshBasicMaterial(  { map: texture1 } );
+			cube1 = new THREE.Mesh( geometry1, material1 );
+			cube1.position.x=-300;
+			cube1.position.y=lane;
+			scene.add( cube1 );
+			lane+=400;
+}
+	//player
+			geometry2 = new THREE.BoxGeometry( 70, 70 , 70 );
+			loader2 = new THREE.TextureLoader();
+			texture2 = loader1.load("box5.jpg");
+			material2 = new THREE.MeshBasicMaterial(  { map: texture2 } );
+			cube2 = new THREE.Mesh( geometry2, material2 );
+			cube2.position.y=-230;
+			cube2.castShadow = true; 
+			cube2.receiveShadow= false;
+			scene.add( cube2 );
+
+	//cars 	
+			geometry3 = new THREE.SphereGeometry( 30, 32, 16 );
+			loader3 = new THREE.TextureLoader();
+			texture3 = loader1.load("spheres.jpg");
+			material3 = new THREE.MeshBasicMaterial(  { map: texture3 } );
+		 	//material3 = new THREE.MeshLambertMaterial( { color: 0xff0000, wireframe:true} );
+		 	sphereN = new THREE.Mesh( geometry3, material3 );
+			sphereN.position.x=-200;
+			sphereN.position.y=-130;
+			//group1.add(sphere1);
+			scene.add(sphereN);//(el 3arbyat el taht)
+
+
+	for(var i=0;i<400;i++){
+			geometry3 = new THREE.SphereGeometry( 30, 32, 16 );
+			loader3 = new THREE.TextureLoader();
+			texture3 = loader1.load("spheres.jpg");
+			material3 = new THREE.MeshBasicMaterial(  { map: texture3 } );
+		 	//material3 = new THREE.MeshLambertMaterial( { color: 0xff0000, wireframe:true} );
+		 	sphere1 = new THREE.Mesh( geometry3, material3 );
+			sphere1.position.x=-200;
+			sphere1.position.y=cars;
+			group1.add(sphere1);
+			scene.add(group1);
+			//scene.add(sphere1);
+			cars+=400;
+		
+			
+}
+	//trucks 
+			geometry4 = new THREE.SphereGeometry( 28, 32, 16 );
+			//loader4 = new THREE.TextureLoader();
+			//texture4 = loader1.load("spheres.jpg");
+			//material4 = new THREE.MeshBasicMaterial(  { map: texture4 } );
+	 		material4 = new THREE.MeshLambertMaterial( { color: 0xCD7F32 , wireframe:true} );
+	 		sphereR = new THREE.Mesh( geometry4, material4 );
+			sphereR.position.x=100;
+			sphereR.position.y=-55;
+			//group2.add(sphere2);
+			scene.add(sphereR);
+
+	for(var i=0;i<400;i++){
+			geometry4 = new THREE.SphereGeometry( 28, 32, 16 );
+			//loader4 = new THREE.TextureLoader();
+			//texture4 = loader1.load("SHPERE8.png");
+			//material4 = new THREE.MeshBasicMaterial(  { map: texture4 } );
+	 		material4 = new THREE.MeshLambertMaterial( { color: 0xCD7F32 , wireframe:true} );
+	 		sphere2 = new THREE.Mesh( geometry4, material4 );
+			sphere2.position.x=100;
+			sphere2.position.y=trucks;
+			group2.add(sphere2);
+			scene.add(group2);
+			trucks+=400;
+
+		}
+
+
+	//trees 
+
+				geometry6 = new THREE.CylinderGeometry( 30, 30, 110, 60 );
+				loader6 = new THREE.TextureLoader();
+				texture6 = loader1.load("cylinder4.jpeg");
+	 			material6 = new THREE.MeshBasicMaterial( {map: texture6} );
+	 			cylinder1 = new THREE.Mesh( geometry6, material6 );
+				cylinder1.position.y=50;
+				//cylinder.rotation.x=Math.PI/6;
+				//group3.add(cylinder);
+				scene.add( cylinder1 );
+				//distanceTree1+=100;
+				distanceTree2+=400;
+	for(var i=0;i<4;i++){
+		
+				geometry5 = new THREE.CylinderGeometry( 30, 30, 110, 60 );
+				loader5 = new THREE.TextureLoader();
+				texture5 = loader1.load("cylinder4.jpeg");
+	 			material5 = new THREE.MeshBasicMaterial( {map: texture5} );
+	 			cylinder = new THREE.Mesh( geometry5, material5 );
+				cylinder.position.y=distanceTree2+400;
+				//cylinder.rotation.x=Math.PI/6;
+				group3.add(cylinder);
+				scene.add( group3 );
+				//distanceTree1+=100;
+				distanceTree2+=400;
+}
+
+	for(var j = 0; j < 40; j++){
+				geometry5 = new THREE.CylinderGeometry( 30, 30, 110, 60 );
+	 			loader5 = new THREE.TextureLoader();
+				texture5 = loader1.load("cylinder4.jpeg");
+	 			material5 = new THREE.MeshBasicMaterial( {map: texture5} );
+	 			cylinder = new THREE.Mesh( geometry5, material5 );
+				cylinder.position.x=distanceTree1;
+				cylinder.position.y=distanceTree2-1600;
+				//cylinder.rotation.y=-Math.PI/6;
+				//group3.add(tress[i]);
+				group3.add(cylinder);
+				scene.add( group3 );
+				distanceTree2+=400;
+
+ 
+
+
+}
+
+
+};
+
+var rendercube2 = function() {
+	document.addEventListener("keydown", onkeydown, false);
+	document.onkeydown=function(e){
+		if(e.keyCode=='38'){
+			cube2.position.y+=14.1;
+			camera.position.y+=9.5;
+			camera.translateY( 3.8 );
+			light.translateY(3.8);
+			scene.add(light);
+			counter++;
+		}
+		else if(e.keyCode=='40'){
+			cube2.position.y-=14.1;
+			camera.position.y-=9.5;
+			camera.translateY(- 3.8  );
+			light.translateY(-3.8);
+			counter--;
+		}
+		else if(e.keyCode=='39'){
+			cube2.position.x+=14.1;
+			camera.position.x+=9.5;
+			camera.translateX( 3.8  );
+			light.translateX(3.8);
+		}
+		else if(e.keyCode=='37'){
+			cube2.position.x-=14.1;
+			camera.position.x-=9.5;
+			camera.translateX( -3.8 );
+		}
+
+	num.innerHTML=counter;
+	check();
+  renderer.render(scene, camera);}
+};
+
+
+  
+
+var renderspheres = function() {
+  	requestAnimationFrame(renderspheres);
+  	//refresh page (recurssion)
+	sphereN.position.x+= 3;
+
+	  	//group2.position.x -= 3;
+	  	//rotate to the left 
+	  		 sphereR.position.x -= 3;
+	if(sphereR.position.x <- 900)
+			{
+				sphereR.position.x=700;
+			}
+		
+		if(sphereN.position.x > 900)
+			{
+				sphereN.position.x=-700;
+			}
+  	group1.position.x+= 3;
+
+  	group2.position.x -= 3;
+  	//rotate to the left 
+
+	if(group1.position.x > 900)
+		{
+			group1.position.x=-700;
+		}
+	else if(group2.position.x < -900)
+		{
+			group2.position.x=700;
+		}
+  renderer.render(scene, camera);
+};
+
+var check=function(){
+	//requestAnimationFrame(check);
+		if(Math.abs(cube2.position.x - cylinder1.position.x)<58 && Math.abs(cube2.position.y - cylinder1.position.y)<85){
+
+
+		//scene.remove(cube2);
+		num.innerHTML="GAME OVER (press any key to continue)";
+		counter=0; 
+		//alert("game over ");
+
+
+
+	}
+
+		if(Math.abs(cube2.position.x - sphereN.position.x)<25 && Math.abs(cube2.position.y - sphereN.position.y)<15){
+
+
+		//scene.remove(cube2);
+			num.innerHTML="GAME OVER (press any key to continue)";
+		counter=0; 
+	
+}
+		if(Math.abs(cube2.position.x - sphereR.position.x)<25 && Math.abs(cube2.position.y - sphereR.position.y)<15){
+
+
+		//scene.remove(cube2);
+		num.innerHTML="GAME OVER (press any key to continue)";
+		counter=0; 
+	
+}
+	
+	renderer.render(scene,camera);
+};
+
+//Init our scene
+init();
+
+</script>
